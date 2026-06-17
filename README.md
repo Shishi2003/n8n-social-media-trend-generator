@@ -61,6 +61,24 @@ Import the workflow into n8n using:
 
 - `social-media-trend-generator-workflow.json`
 
+## Workflow Screenshots
+
+### Complete Workflow Overview
+
+![Workflow Overview](assets/WorkFlow%20Overview%20-%201.png)
+
+### Trend Discovery & Configuration
+
+![Trend Discovery](assets/WorkFlow%20Overview%20-%202.png)
+
+### Trend Analysis & Selection
+
+![Trend Analysis](assets/WorkFlow%20Overview%20-%203.png)
+
+### Draft Generation & Review Process
+
+![Draft Generation](assets/WorkFlow%20Overview%20-%204.png)
+
 ## License
 
 MIT License
