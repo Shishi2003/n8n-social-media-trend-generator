@@ -1,5 +1,17 @@
 # Social Media Trend Generation Workflow
 
+## Table of Contents
+
+- Overview
+- Who It's For
+- Requirements
+- Required Nodes
+- How to Use It
+- How It Works
+- Inputs & Outputs
+- Configuration Guide
+- Troubleshooting
+
 ## Overview – What This Workflow Does
 
 Creating social media content consistently is a time-consuming process. Teams often spend hours searching for trending topics, researching industry news, brainstorming content ideas, drafting posts, and coordinating approvals before anything can be published.
