@@ -1,0 +1,439 @@
+{
+  "name": "Social media Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "maxOutputTokens": 100000,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        320
+      ],
+      "id": "9293b04f-aece-4eb9-a6f7-32b7268e688a",
+      "name": "AI Model – Gemini Engine",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OOCrmqOCG0CCqOJb",
+          "name": "Google Gemini(PaLM) Api account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Senior Social Media Content Architect. Your goal is to transform raw data into platform-perfect posts based on specific parameters.\n\n---\nINPUTS\n---\n\nWRITING FRAMEWORK\nYou must apply the following definitions strictly based on the Inputs provided:\n\nTONE RULES (What to say):\n• Informational: Focus on clear, factual, and direct information.\n• Educational: Provide structured, step-by-step clarity.\n• Inspirational: Use emotional, motivational, and uplifting language.\n• Opinionated: Take a bold, strong stance on the topic.\n• Storytelling: Use a narrative, relatable flow to deliver the message.\n\nSTYLE RULES (How to write):\n• Analytical: Use logical, structured reasoning.\n• Persuasive: Focus on benefit-driven and convincing language.\n• Professional: Maintain a clean, business-appropriate tone.\n• Humorous: Keep it light, witty, and engaging.\n• Technical: Ensure the output is precise and deep.\n• Concise: Keep sentences short, sharp, and punchy.\n• Conversational: Write in a natural, human, and approachable way.\n• Authoritative: Speak with a confident, expert voice.\n• Creative: Use unique, expressive, and non-traditional phrasing.\n\n---\n\nPLATFORM GUIDELINES\n• LinkedIn: Professional authority, high-value insights, clean spacing. No hashtags.\n• X: Punchy, \"atomic\" thoughts. Max 280 chars. Strong hooks.\n• Instagram: Focus on saveable value. Visual storytelling. 5-10 hashtags allowed.\n• Facebook: Community-focused, relatable, encourages comments/shares.\n\n---\n\nIMAGE STRATEGY\nIf the content is visual, provide a \"Subject + Environment + Style + Lighting\" prompt. Otherwise, return null.\n\n---\n\nSTRICT OUTPUT FORMAT (JSON ONLY)\nReturn ONLY a valid JSON object. No markdown, no bolding, no asterisks, no commentary.\n\n{\n  \"title\": \"string\",\n  \"post_content\": \"Platform: [Name]\\n\\n[Content Text]\\n\\n---\",\n  \"image_prompt\": \"string or null\"\n}\n\n---\n\nSTRICT CONSTRAINTS\n1. No Markdown formatting (No *, **, #, or _).\n2. Bullets must be • or 1. only.\n3. Use plain text only.\n4. Ensure the post_content strictly reflects the Tone and Style definitions provided above.",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        992,
+        96
+      ],
+      "id": "bd7b5301-d606-4a7d-8558-5ef49e45893e",
+      "name": "AI Processor – Generate Social Posts"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"description\": \"One strong, engaging title for the overall content\"\n    },\n    \"post_content\": {\n      \"type\": \"string\",\n      \"description\": \"All platform posts combined into one string, clearly separated by platform labels like 'Platform: LinkedIn' and 'Platform: X'\"\n    },\n    \"image_prompt\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"A detailed image generation prompt if a visual is useful, otherwise null\"\n    }\n  },\n  \"required\": [\"title\", \"post_content\", \"image_prompt\"],\n  \"additionalProperties\": false\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1136,
+        320
+      ],
+      "id": "090bfb8c-12df-4b58-8ba2-3924631ed5c9",
+      "name": "Output Formatter – Enforce JSON Schema"
+    },
+    {
+      "parameters": {
+        "folderId": "=default",
+        "title": "={{ $('AI Processor – Generate Social Posts').item.json.output.title }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        96
+      ],
+      "id": "3c8e17c9-99f9-4394-89c9-1b76a506c584",
+      "name": "Docs – Create Draft Document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "xKb32MKdoAHyX99Y",
+          "name": "Google Docs - (bharat@jivrus.com)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "=Title:\n{{ $('AI Processor – Generate Social Posts').item.json.output.title }}\n\nContent:\n{{ $('AI Processor – Generate Social Posts').item.json.output.post_content }}\n\nImage Prompt:\n{{ $('AI Processor – Generate Social Posts').item.json.output.image_prompt }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        96
+      ],
+      "id": "fc6b459d-1ddd-43dd-898c-e563cae7bf72",
+      "name": "Docs – Insert Generated Content",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "xKb32MKdoAHyX99Y",
+          "name": "Google Docs - (bharat@jivrus.com)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1bMByM0pZ_5dxYxa2uc7GoJDWcI_g0FePzJt0cqbmnzA",
+          "mode": "list",
+          "cachedResultName": "Social media posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bMByM0pZ_5dxYxa2uc7GoJDWcI_g0FePzJt0cqbmnzA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bMByM0pZ_5dxYxa2uc7GoJDWcI_g0FePzJt0cqbmnzA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $('AI Processor – Generate Social Posts').item.json.output.title }}",
+            "status": "DRAFT",
+            "doc_link": "=https://docs.google.com/document/d/{{ $('Docs – Create Draft Document').item.json.id }}/edit"
+          },
+          "matchingColumns": [
+            "title"
+          ],
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "doc_link",
+              "displayName": "doc_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "platforms",
+              "displayName": "platforms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scheduled_at",
+              "displayName": "scheduled_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1792,
+        96
+      ],
+      "id": "381984ef-7811-4ca1-ab94-b03a448b85eb",
+      "name": "Sheets – Save Draft Metadata",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eeSzpngJMNpH1Nuc",
+          "name": "Google Sheets(bharat@jivrus.com)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "=bharat@jivrus.com",
+        "subject": "=New Post – Ready for Review – {{ $json.title }}",
+        "message": "=Hi there,\n\nA new post has been generated and is ready for your review.\n\nView Document:\nDraft: https://docs.google.com/document/d/{{ $('Docs – Create Draft Document').item.json.id }}/view\n\nPlease review the document, make any necessary edits directly in the doc, and approve it once finalized.\n\nThanks,\nSocial Media Automation System",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2016,
+        96
+      ],
+      "id": "1ea8b255-e7bb-48f5-a8f8-de52c179f78a",
+      "name": "Approval – Send Review Email",
+      "webhookId": "4fd91eea-e872-488d-b037-4939c5181f61",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "H9tIQ7nffyDfEz4r",
+          "name": "Gmail - (bharat@jivrus.com)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1bMByM0pZ_5dxYxa2uc7GoJDWcI_g0FePzJt0cqbmnzA",
+          "mode": "list",
+          "cachedResultName": "Social media posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bMByM0pZ_5dxYxa2uc7GoJDWcI_g0FePzJt0cqbmnzA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bMByM0pZ_5dxYxa2uc7GoJDWcI_g0FePzJt0cqbmnzA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $('AI Processor – Generate Social Posts').item.json.output.title }}",
+            "status": "={{ $json.data.approved ? 'APPROVED' : 'REJECTED' }}"
+          },
+          "matchingColumns": [
+            "title"
+          ],
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "doc_link",
+              "displayName": "doc_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "platforms",
+              "displayName": "platforms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scheduled_at",
+              "displayName": "scheduled_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2240,
+        96
+      ],
+      "id": "71ba6ed9-e56e-4e12-b260-56b690bf880a",
+      "name": "Sheets – Update Approval Status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eeSzpngJMNpH1Nuc",
+          "name": "Google Sheets(bharat@jivrus.com)"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Model – Gemini Engine": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Processor – Generate Social Posts",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Processor – Generate Social Posts": {
+      "main": [
+        [
+          {
+            "node": "Docs – Create Draft Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output Formatter – Enforce JSON Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Processor – Generate Social Posts",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Docs – Create Draft Document": {
+      "main": [
+        [
+          {
+            "node": "Docs – Insert Generated Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Docs – Insert Generated Content": {
+      "main": [
+        [
+          {
+            "node": "Sheets – Save Draft Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets – Save Draft Metadata": {
+      "main": [
+        [
+          {
+            "node": "Approval – Send Review Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approval – Send Review Email": {
+      "main": [
+        [
+          {
+            "node": "Sheets – Update Approval Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "504dabaa-d874-48ec-a2e6-b3e0cad10a7a",
+  "meta": {
+    "instanceId": "5a064eab1f268946bc007c4172b2fb6debef9dbda2a90313cc0c931db4dbf7e6"
+  },
+  "id": "AZ5UaOf7N1GukDCc",
+  "tags": []
+}
