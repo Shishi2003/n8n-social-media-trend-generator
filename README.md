@@ -49,6 +49,18 @@ The workflow automatically:
 - Google Docs
 - Gmail
 
+## Documentation
+
+Detailed workflow documentation is available here:
+
+- [Workflow Documentation](docs/WORKFLOW_DOCUMENTATION.md)
+
+## Workflow File
+
+Import the workflow into n8n using:
+
+- `social-media-trend-generator-workflow.json`
+
 ## License
 
 MIT License
